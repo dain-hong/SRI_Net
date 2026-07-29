@@ -36,11 +36,10 @@ sri_net/
 
 ## Preprocessing
 <img width="892" height="253" alt="image" src="https://github.com/user-attachments/assets/e24be0ac-8cfc-46de-8955-874ba4b1b25e" />
-
 입력 얼굴 이미지는 조명 및 반사 성분을 분해하여 학습용 NPZ 형식으로 변환됩니다.
 
 ### Pipeline
-
+```text
 1. **3D Face Reconstruction**
    - 3DDFA를 이용하여 얼굴의 3D 형상을 복원합니다.
 
@@ -55,7 +54,7 @@ sri_net/
 
 5. **NPZ Generation**
    - `image`, `tex_uv`, `amb_uv`, `dl_uv`, `spr_uv`, `label`을 저장합니다.
-
+```
 
 ## 구현 참고 사항
 
