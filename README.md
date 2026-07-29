@@ -65,6 +65,10 @@ sri_net/
 
 ```text
 I = (Ambient + Direct) × Texture
+```
+## Method
+각 브랜치는 Xception Backbone을 통해 특징을 추출하며, 추출된 특징을 융합하여 최종적으로 Real/Fake를 분류합니다.
+<img width="912" height="379" alt="image" src="https://github.com/user-attachments/assets/8c529745-c928-41bb-82cb-c143eb85e0c1" />
 
 
 
