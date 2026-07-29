@@ -1,4 +1,4 @@
-# SRI_Net_Repro
+# SRI_Net_Reproduction
 Reproduction of SRI-Net for deepfake detection using Phong illumination decomposition
 
 ## Overview
@@ -89,4 +89,24 @@ I = (Ambient + Direct) × Texture
 > 본 저장소에는 원본 데이터셋이 포함되어 있지 않습니다.
 
 
+## Results
+### Cross-manipulation (DF40)
 
+| Manipulation | SRI-Net (Paper) | Reproduction |
+|--------------|----------------:|-------------:|
+| UniFace | 92.0 | 81.74 |
+| E4S | 89.4 | 63.85 |
+| FaceDancer | 95.3 | 61.99 |
+| FSGAN | 94.2 | 79.12 |
+| InSwap | 91.1 | 80.64 |
+| SimSwap | 83.3 | 74.01 |
+| **Average** | **90.9** | **73.21** |
+
+### Cross-dataset (Celeb-DF-v1)
+
+| Dataset | SRI-Net (Paper) | Reproduction |
+|---------|----------------:|-------------:|
+| Celeb-DF-v1 | **91.3** | **71.11** |
+
+
+> Differences from the reported performance may arise from implementation details, preprocessing, training settings, and hardware environments.
