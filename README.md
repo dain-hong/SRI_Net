@@ -1,4 +1,4 @@
-# SRI_Net
+# SRI_Net_Repro
 Reproduction of SRI-Net for deepfake detection using Phong illumination decomposition
 
 ## Overview
@@ -63,11 +63,30 @@ sri_net/
 ```text
 I = (Ambient + Direct) × Texture
 ```
-## Method
+## Model
 각 브랜치는 Xception Backbone을 통해 특징을 추출하며, 추출된 특징을 융합하여 최종적으로 Real/Fake를 분류합니다.
 <img width="912" height="379" alt="image" src="https://github.com/user-attachments/assets/8c529745-c928-41bb-82cb-c143eb85e0c1" />
 
+## Datasets
 
+### 학습 데이터셋
+
+- FaceForensics++ (c23)
+  - Deepfakes
+  - Face2Face
+  - FaceSwap
+  - NeuralTextures
+
+### 평가 데이터셋
+
+- FaceForensics++ Test (In-domain)
+- DF40 (Cross-dataset)
+- Celeb-DF-v1 (Cross-dataset)
+
+### Dataset References
+- DeepfakeBench: https://github.com/SCLBD/DeepfakeBench
+- DF40: https://github.com/YZY-stack/DF40
+> 본 저장소에는 원본 데이터셋이 포함되어 있지 않습니다.
 
 
 
