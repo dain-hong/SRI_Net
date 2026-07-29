@@ -35,6 +35,7 @@ sri_net/
 ```
 
 ## Preprocessing
+<img width="892" height="253" alt="image" src="https://github.com/user-attachments/assets/e24be0ac-8cfc-46de-8955-874ba4b1b25e" />
 
 입력 얼굴 이미지는 조명 및 반사 성분을 분해하여 학습용 NPZ 형식으로 변환됩니다.
 
