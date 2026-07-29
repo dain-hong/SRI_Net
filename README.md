@@ -33,3 +33,39 @@ sri_net/
 ├── test.py                      # Evaluation script
 └── README.md
 ```
+
+## Preprocessing
+
+입력 얼굴 이미지는 조명 및 반사 성분을 분해하여 학습용 NPZ 형식으로 변환됩니다.
+
+### Pipeline
+
+1. **3D Face Reconstruction**
+   - 3DDFA를 이용하여 얼굴의 3D 형상을 복원합니다.
+
+2. **Texture Estimation**
+   - Multi-Scale Retinex(MSR)를 이용하여 Texture를 추정합니다.
+
+3. **Illumination Separation**
+   - Spherical Harmonics(SH)를 이용하여 Ambient Light와 Direct Light를 추정하고, Specular Reflection을 계산합니다.
+
+4. **UV Map Generation**
+   - 각 조명 성분을 UV Map으로 변환합니다.
+
+5. **NPZ Generation**
+   - `image`, `tex_uv`, `amb_uv`, `dl_uv`, `spr_uv`, `label`을 저장합니다.
+
+
+## 구현 참고 사항
+
+원 논문과 달리, 본 구현에서는 MSR 출력에 `exp`를 적용하여 Texture를 선형 도메인으로 변환한 뒤 조명 성분을 분해합니다.
+
+이는 다음 조명 모델이 선형 도메인에서 성립하도록 하기 위한 구현상의 차이입니다.
+
+```text
+I = (Ambient + Direct) × Texture
+
+
+
+
+
