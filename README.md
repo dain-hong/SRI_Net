@@ -40,19 +40,19 @@ sri_net/
 
 ### Pipeline
 1. **3D Face Reconstruction**
-   - 3DDFA를 이용하여 얼굴의 3D 형상을 복원합니다.
+   - 3DDFA를 이용하여 얼굴의 3D 형상을 복원
 
 2. **Texture Estimation**
-   - Multi-Scale Retinex(MSR)를 이용하여 Texture를 추정합니다.
+   - Multi-Scale Retinex(MSR)를 이용하여 Texture를 추정
 
 3. **Illumination Separation**
-   - Spherical Harmonics(SH)를 이용하여 Ambient Light와 Direct Light를 추정하고, Specular Reflection을 계산합니다.
+   - Spherical Harmonics(SH)를 이용하여 Ambient Light와 Direct Light를 추정하고, Specular Reflection을 계산
 
 4. **UV Map Generation**
-   - 각 조명 성분을 UV Map으로 변환합니다.
+   - 각 조명 성분을 UV Map으로 변환
 
 5. **NPZ Generation**
-   - `image`, `tex_uv`, `amb_uv`, `dl_uv`, `spr_uv`, `label`을 저장합니다.
+   - `image`, `tex_uv`, `amb_uv`, `dl_uv`, `spr_uv`, `label`을 저장
   
 ## 전처리 실행 방법
 
