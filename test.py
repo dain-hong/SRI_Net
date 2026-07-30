@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-학습된 SRI-Net 체크포인트로 FF++ val / Celeb-DF-v1 / DF40 전 서브셋 평가.
-결과는 콘솔 출력 + (설정 시) JSON 저장.
-"""
+
 import os
 import json
 import argparse
