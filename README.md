@@ -98,10 +98,10 @@ I = (Ambient + Direct) × Texture
 
 ## Train / Test 실행 방법
 
-\`\`\`bash
+```text
 python train.py --config config/config.yaml
 python test.py --config config/config.yaml
-\`\`\`
+```
 
 ## Results
 ### Cross-manipulation (DF40)
