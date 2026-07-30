@@ -94,7 +94,7 @@ Texture=exp(T_MSR)
 ### 평가 데이터셋
 
 - FaceForensics++ Test (In-domain)
-- DF40 (Cross-dataset)
+- DF40 (Cross-manipulation)
 - Celeb-DF-v1 (Cross-dataset)
 
 ### Dataset References
