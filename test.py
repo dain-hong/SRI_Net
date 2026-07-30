@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from sklearn.metrics import roc_auc_score, accuracy_score
 
-from models.sri_net import SRINet
+from model.sri_net import SRINet
 from data.dataset import get_dataloader
 
 
@@ -42,6 +42,8 @@ def evaluate(model, dataloader, device, keys):
         probs = torch.softmax(output['logits'], dim=1)[:, 1]
         all_labels.append(labels.cpu().numpy())
         all_probs.append(probs.cpu().numpy())
+    if not all_labels:
+        return {'auc': float('nan'), 'acc': float('nan'), 'n': 0}
     all_labels = np.concatenate(all_labels)
     all_probs  = np.concatenate(all_probs)
     try:
@@ -72,7 +74,7 @@ def main(cfg_path, ckpt_override=None):
     val_loader = get_dataloader(
         meanstd_path=cfg['data']['meanstd_path'], mode='val',
         batch_size=cfg['test']['batch_size'], num_workers=cfg['test']['num_workers'],
-        use_pair=False, ff_npz_base=cfg['data']['ff_npz_base'],
+        ff_npz_base=cfg['data']['ff_npz_base'],
         use_image=cfg['model']['use_image'], use_spr=cfg['model']['use_spr'],
         use_tex=cfg['model']['use_tex'], use_dl=cfg['model']['use_dl'], aug_use=False)
     results['ffpp_val'] = evaluate(model, val_loader, device, keys)
@@ -80,7 +82,7 @@ def main(cfg_path, ckpt_override=None):
     celeb_loader = get_dataloader(
         meanstd_path=cfg['data']['meanstd_path'], mode='celeb',
         batch_size=cfg['test']['batch_size'], num_workers=cfg['test']['num_workers'],
-        use_pair=False, celeb_json_path=cfg['data']['celeb_json_path'],
+        celeb_json_path=cfg['data']['celeb_json_path'],
         celeb_npz_root=cfg['data']['celeb_npz_root'],
         use_image=cfg['model']['use_image'], use_spr=cfg['model']['use_spr'],
         use_tex=cfg['model']['use_tex'], use_dl=cfg['model']['use_dl'], aug_use=False)
@@ -90,7 +92,7 @@ def main(cfg_path, ckpt_override=None):
         loader = get_dataloader(
             meanstd_path=cfg['data']['meanstd_path'], mode='df40',
             batch_size=cfg['test']['batch_size'], num_workers=cfg['test']['num_workers'],
-            use_pair=False, df40_json_dir=cfg['data']['df40_json_dir'],
+            df40_json_dir=cfg['data']['df40_json_dir'],
             df40_npz_root=cfg['data']['df40_npz_root'], df40_datasets=[ds],
             use_image=cfg['model']['use_image'], use_spr=cfg['model']['use_spr'],
             use_tex=cfg['model']['use_tex'], use_dl=cfg['model']['use_dl'], aug_use=False)
