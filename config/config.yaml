@@ -1,0 +1,62 @@
+model:
+  use_image: true
+  use_spr: true
+  use_tex: true
+  use_dl: true
+  num_classes: 2
+  pretrained: true
+  image_pretrained: /home/user/workspaces/deepfakebench/training/pretrained/xception-b5690688.pth
+  dropout: 0.5
+  spr_skip_mid: false
+
+data:
+  meanstd_path: /home/user/workspaces/dain/sri_net/preprocessing/meanstd.json
+  ff_npz_base:  /home/user/workspaces/dain/npz/npz6/ffpp/train
+  celeb_json_path: /home/user/workspaces/deepfakebench/preprocessing/dataset_json/Celeb-DF-v1.json
+  celeb_npz_root:  /home/user/workspaces/dain/sri_net2/npz6/CelebDFv1
+  df40_json_dir:   /home/user/workspaces/dain/sri_net2/json/df40
+  df40_npz_root:   /home/user/workspaces/dain/sri_net2/npz6/DF40
+  df40_datasets: []   # DF40 npz 아직 없음 → 평가에서 제외 (준비되면 [e4s, facedancer, uniface, simswap, inswap, fsgan] 등으로 채우기)
+
+  use_pair: true
+  aug_use: true
+  aug_hflip_p: 0.5
+  aug_cutout_p: 0.5
+  aug_noise_p: 0.3
+
+  batch_size: 32
+  num_workers: 8
+  use_weighted_sampler: false
+
+train:
+  epochs: 50
+  lr: 0.0002
+  weight_decay: 0.00001
+  optimizer: adamw
+  scheduler: cosine
+  warmup_epochs: 2
+  min_lr: 0.0000001
+
+  # loss weights
+  aux_loss_weight: 0.3
+  contrastive_weight: 0.2
+  contrastive_margin: -1.0
+
+  device: cuda
+  cudnn_enabled: false   # RTX 5090 (sm_120) 호환을 위해 항상 false
+  seed: 42
+  amp: true
+  grad_clip_norm: 5.0
+
+  log_interval: 50
+  eval_interval: 1
+  select_metric: ffpp_val_auc   # celeb npz 경로 확정되면 celeb_auc로 변경
+
+  save_dir: /home/user/workspaces/dain/sri_net2/result/exp1
+  resume: null
+
+test:
+  ckpt_path: /home/user/workspaces/dain/sri_net2/result/exp1/best.pth
+  batch_size: 64
+  num_workers: 8
+  save_json: /home/user/workspaces/dain/sri_net2/result/exp1/test_results.json

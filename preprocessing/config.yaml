@@ -1,0 +1,30 @@
+# sri_net 실제 환경용 config
+# 이전 3개 스크립트(FF++/DF40/Celeb-DF)에 하드코딩돼 있던 경로 그대로 옮김
+
+# ---- 공통 (3DDFA 모델/렌더링) ----
+model_path: /home/user/workspaces/dain/3DDFA/models/phase1_wpdc_vdc.pth.tar
+tri_path:   /home/user/workspaces/dain/3DDFA/visualize/tri.mat
+uv_path:    /home/user/workspaces/dain/3DDFA/uv_coords.npy
+
+npz_root: /home/user/workspaces/dain/npz/npz6
+uv_size: 256
+out_size: 256
+sigmas: [15.0, 80.0, 120.0]
+num_workers: 40
+
+# ---- FF++ ----
+ffpp:
+  json_path:    /home/user/workspaces/deepfakebench/preprocessing/dataset_json/FaceForensics++.json
+  base_img_dir: /home/user/workspaces/deepfakebench/datasets/rgb
+
+# ---- DF40 ----
+df40:
+  json_dir: /home/user/workspaces/dataset/DF40/json
+  path_prefix_map:
+    "deepfakes_detection_datasets/FaceForensics++": /home/user/workspaces/dataset/DF40/FaceForensics++
+    "deepfakes_detection_datasets/DF40": /home/user/workspaces/dataset/DF40
+
+# ---- Celeb-DF-v1 ----
+celebdf:
+  json_path:    /home/user/workspaces/deepfakebench/preprocessing/dataset_json/Celeb-DF-v1.json
+  base_img_dir: /home/user/workspaces/deepfakebench/datasets/rgb

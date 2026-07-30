@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+
+*.pth
+*.pt
+*.ckpt
+*.npz
+*.npy
+
+checkpoints/
+outputs/
+runs/
+logs/
+
+.DS_Store
