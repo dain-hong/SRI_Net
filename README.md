@@ -129,4 +129,4 @@ python test.py --config config/config.yaml
 | Celeb-DF-v1 | **91.3** | **71.11** |
 
 
-> Differences from the reported performance may arise from implementation details, preprocessing, training settings, and hardware environments.
+> 재현 결과는 원 논문에서 보고한 성능과 차이가 있습니다. 이는 공개되지 않은 전처리 과정, 구현 세부 사항, MSR 처리 방식 및 데이터 생성 과정의 차이로 인해 발생했을 가능성이 있습니다.
