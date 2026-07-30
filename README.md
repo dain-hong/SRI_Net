@@ -56,11 +56,11 @@ sri_net/
   
 ## 전처리 실행 방법
 
-\`\`\`bash
+```text
 git clone https://github.com/cleardusk/3DDFA.git
 python export_npz.py --json_path <FF++ json> --img_dir <원본 프레임 경로> --out_dir <npz 저장 경로>
 python compute_meanstd.py --npz_base <npz train 경로> --out meanstd.json --mask_zero
-\`\`\`
+```
 
 ## 구현 참고 사항
 
