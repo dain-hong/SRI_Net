@@ -63,14 +63,20 @@ python compute_meanstd.py --npz_base <npz train 경로> --out meanstd.json --mas
 ```
 
 ## 구현 참고 사항
+원 논문에서는 MSR을 통해 얻은 로그 도메인의 Texture 값을 사용합니다. 그러나 이후의 조명 분해식은 선형 도메인의 Texture를 전제로 합니다.
+```text
+I=(Ambient+Direct)×Texture
+```
+로그 도메인의 Texture를 이 식에 그대로 적용하면 도메인이 일치하지 않아 조명 값이 지나치게 커지거나 음수가 되는 등 불안정한 결과가 발생할 수 있습니다.
 
+따라서 본 구현에서는 MSR 출력에 지수 함수를 적용하여 Texture를 선형 도메인으로 복원한 뒤 조명 성분을 분해합니다.
+```text
+Texture=exp(T_MSR)
+```
 원 논문과 달리, 본 구현에서는 MSR 출력에 `exp`를 적용하여 Texture를 선형 도메인으로 변환한 뒤 조명 성분을 분해합니다.
 
 이는 다음 조명 모델이 선형 도메인에서 성립하도록 하기 위한 구현상의 차이입니다.
 
-```text
-I = (Ambient + Direct) × Texture
-```
 ## Model
 각 브랜치는 Xception Backbone을 통해 특징을 추출하며, 추출된 특징을 융합하여 최종적으로 Real/Fake를 분류합니다.
 <img width="912" height="379" alt="image" src="https://github.com/user-attachments/assets/8c529745-c928-41bb-82cb-c143eb85e0c1" />
