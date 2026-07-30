@@ -8,7 +8,7 @@ import torch
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 import torchvision.transforms as transforms
-import torchvision.transforms.functional as TF
+
 
 def df40_rel_to_npz(frame_rel, npz_root, dataset_name):
     clean_path = frame_rel.replace('\\', '/')
@@ -17,11 +17,13 @@ def df40_rel_to_npz(frame_rel, npz_root, dataset_name):
     sub_path = sub_path.replace('.png', '.npz')
     return os.path.join(npz_root, dataset_name, sub_path)
 
+
 def celeb_rel_to_npz(frame_rel, npz_root, is_fake):
     clean = frame_rel.replace('//', '/').replace('\\', '/')
     vid_id     = clean.split('/')[-2]
     frame_name = os.path.basename(clean).replace('.png', '.npz')
     return os.path.join(npz_root, 'test', str(is_fake), vid_id, frame_name)
+
 
 def apply_jpeg_compression(img_np, quality_range=(30, 95)):
     import cv2
@@ -31,6 +33,7 @@ def apply_jpeg_compression(img_np, quality_range=(30, 95)):
     _, enc = cv2.imencode('.jpg', cv2.cvtColor(img_u8, cv2.COLOR_RGB2BGR), encode_param)
     dec = cv2.imdecode(enc, cv2.IMREAD_COLOR)
     return cv2.cvtColor(dec, cv2.COLOR_BGR2RGB).astype(np.float32)
+
 
 class SRINetDataset(Dataset):
     DF40_CONFIG = {
@@ -42,14 +45,13 @@ class SRINetDataset(Dataset):
         'fsgan':      {'json': 'fsgan_ff.json',      'top_key': 'fsgan_ff',      'real_key': 'fsgan_Real',      'fake_key': 'fsgan_Fake'},
     }
 
-    def __init__(self, meanstd_path, mode='train', use_pair=True, ff_json_path=None, ff_npz_base=None,
+    def __init__(self, meanstd_path, mode='train', ff_json_path=None, ff_npz_base=None,
                  df40_json_dir=None, df40_npz_root=None, df40_datasets=None,
                  celeb_json_path=None, celeb_npz_root=None,
                  use_image=True, use_spr=True, use_tex=True, use_dl=True,
                  aug_use=True, aug_hflip_p=0.5, aug_cutout_p=0.5, aug_noise_p=0.3):
 
         self.mode         = mode
-        self.use_pair     = use_pair
         self.use_image    = use_image
         self.use_spr      = use_spr
         self.use_tex      = use_tex
@@ -73,62 +75,16 @@ class SRINetDataset(Dataset):
             self.normalizers['spr']   = transforms.Normalize(mean=ms['spr_uv']['mean'], std=ms['spr_uv']['std'])
 
         if mode in ('train', 'val'):
-            raw_samples = self._from_folder_structure(ff_npz_base)
+            self.samples = self._from_folder_structure(ff_npz_base)
         elif mode == 'celeb':
-            raw_samples = self._from_celeb_json(celeb_json_path, celeb_npz_root)
+            self.samples = self._from_celeb_json(celeb_json_path, celeb_npz_root)
         else:
-            raw_samples = self._from_df40_json(df40_json_dir, df40_npz_root, df40_datasets)
+            self.samples = self._from_df40_json(df40_json_dir, df40_npz_root, df40_datasets)
 
-        if mode == 'train' and self.use_pair:
-            self.samples = self._build_pairs(raw_samples)
-            print(f"[{mode}] Loaded: {len(self.samples)} Pairs for Contrastive Learning")
-            self._pair_example_logged = False
-        else:
-            self.samples = raw_samples
-            print(f"[{mode}] Loaded: Real={sum(1 for _,l in self.samples if l==0)}, "
-                  f"Fake={sum(1 for _,l in self.samples if l==1)}, Total={len(self.samples)}"
-                  + (" (flat, no pairing)" if mode == 'train' else ""))
-
-    def _build_pairs(self, raw_samples):
-        real_dict = {}
-        fake_list = []
-        paired_samples = []
-
-        print("🔄 진짜-가짜 짝꿍(Pair) 매칭 진행 중...")
-
-        for path, label in raw_samples:
-            if label == 0:
-                parts = path.replace('\\', '/').split('/')
-                vid_id = parts[-2]
-                frame_id = parts[-1]
-                real_dict[f"{vid_id}_{frame_id}"] = path
-            else:
-                fake_list.append(path)
-
-        for fake_path in fake_list:
-            parts = fake_path.replace('\\', '/').split('/')
-            vid_id_pair = parts[-2]
-            frame_id = parts[-1]
-
-            if '_' in vid_id_pair:
-                source_id, target_id = vid_id_pair.split('_')
-                target_key = f"{target_id}_{frame_id}"
-                source_key = f"{source_id}_{frame_id}"
-
-                if target_key in real_dict:
-                    paired_samples.append((real_dict[target_key], fake_path))
-                elif source_key in real_dict:
-                    paired_samples.append((real_dict[source_key], fake_path))
-            else:
-                real_key = f"{vid_id_pair}_{frame_id}"
-                if real_key in real_dict:
-                    paired_samples.append((real_dict[real_key], fake_path))
-
-        return paired_samples
+        print(f"[{mode}] Loaded: Real={sum(1 for _, l in self.samples if l == 0)}, "
+              f"Fake={sum(1 for _, l in self.samples if l == 1)}, Total={len(self.samples)}")
 
     def get_sampler(self):
-        if self.mode == 'train' and self.use_pair:
-            raise ValueError("Pair 학습 시에는 클래스가 1:1로 고정되므로 WeightedRandomSampler를 사용할 필요가 없습니다.")
         labels = [l for _, l in self.samples]
         class_counts = np.bincount(labels)
         weights = 1.0 / class_counts[labels]
@@ -231,58 +187,37 @@ class SRINetDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def _load_single_npz(self, npz_path, do_flip):
-        npz = np.load(npz_path)
-        img_np = None
-
-        if self.use_image and self.mode == 'train' and self.aug_use:
-            img_np = self._augment_image(npz['image'].copy(), do_flip=do_flip)
-
-        active = []
-        key_map = [('image', 'image', self.use_image), ('tex', 'tex_uv', self.use_tex),
-                   ('dl', 'dl_uv', self.use_dl), ('spr', 'spr_uv', self.use_spr)]
-
-        for b_key, n_key, use in key_map:
-            if use and n_key in npz:
-                if b_key == 'image':
-                    arr = img_np if img_np is not None else npz[n_key]
-                    t = torch.from_numpy(arr.transpose(2, 0, 1).astype(np.float32)) / 255.0
-                else:
-                    arr = npz[n_key].astype(np.float32)
-                    if do_flip:
-                        arr = arr[:, ::-1, :].copy()
-                    t = torch.from_numpy(arr.transpose(2, 0, 1))
-                active.append((b_key, t))
-
-        sample = {k: self.normalizers[k](t) for k, t in active}
-        return sample
-
     def __getitem__(self, idx):
         try:
-            if self.mode == 'train' and self.use_pair:
-                real_path, fake_path = self.samples[idx]
-                do_flip = self.aug_use and random.random() < self.aug_hflip_p
+            npz_path, label = self.samples[idx]
+            do_flip = self.aug_use and self.mode == 'train' and random.random() < self.aug_hflip_p
 
-                real_sample = self._load_single_npz(real_path, do_flip)
-                fake_sample = self._load_single_npz(fake_path, do_flip)
+            npz = np.load(npz_path)
+            img_np = None
+            if self.use_image and self.mode == 'train' and self.aug_use:
+                img_np = self._augment_image(npz['image'].copy(), do_flip=do_flip)
 
-                real_sample['label'] = torch.tensor(0, dtype=torch.long)
-                fake_sample['label'] = torch.tensor(1, dtype=torch.long)
+            active = []
+            key_map = [('image', 'image', self.use_image), ('tex', 'tex_uv', self.use_tex),
+                       ('dl', 'dl_uv', self.use_dl), ('spr', 'spr_uv', self.use_spr)]
 
-                if not self._pair_example_logged:
-                    print(f"[Pair Sample Check] REAL: {real_path}  <->  FAKE: {fake_path}")
-                    self._pair_example_logged = True
+            for b_key, n_key, use in key_map:
+                if use and n_key in npz:
+                    if b_key == 'image':
+                        arr = img_np if img_np is not None else npz[n_key]
+                        t = torch.from_numpy(arr.transpose(2, 0, 1).astype(np.float32)) / 255.0
+                    else:
+                        arr = npz[n_key].astype(np.float32)
+                        if do_flip:
+                            arr = arr[:, ::-1, :].copy()
+                        t = torch.from_numpy(arr.transpose(2, 0, 1))
+                    active.append((b_key, t))
 
-                return {'real': real_sample, 'fake': fake_sample}
-            else:
-                npz_path, label = self.samples[idx]
-                do_flip = self.aug_use and self.mode == 'train' and random.random() < self.aug_hflip_p
-                sample = self._load_single_npz(npz_path, do_flip=do_flip)
-                sample['label'] = torch.tensor(label, dtype=torch.long)
-                return sample
+            sample = {k: self.normalizers[k](t) for k, t in active}
+            sample['label'] = torch.tensor(label, dtype=torch.long)
+            return sample
 
         except Exception as e:
-            import traceback
             print(f"[SRINetDataset] 샘플 로드 실패 (idx={idx})")
             print(f"  에러: {type(e).__name__}: {e}")
             if not hasattr(self, '_fallback_count'): self._fallback_count = 0
@@ -293,16 +228,10 @@ class SRINetDataset(Dataset):
 
 
 def get_dataloader(meanstd_path, mode='train', batch_size=32, num_workers=4,
-                   use_weighted_sampler=False, use_pair=True, **kwargs):
-    dataset = SRINetDataset(meanstd_path=meanstd_path, mode=mode, use_pair=use_pair, **kwargs)
+                   use_weighted_sampler=False, **kwargs):
+    dataset = SRINetDataset(meanstd_path=meanstd_path, mode=mode, **kwargs)
 
-    if mode == 'train' and use_pair:
-        if use_weighted_sampler:
-            print("⚠️ Train 모드에서는 Pair 구성으로 인해 완벽한 클래스 밸런스(50:50)가 보장되므로, WeightedRandomSampler를 무시하고 일반 Shuffle을 사용합니다.")
-        return DataLoader(dataset, batch_size=batch_size, shuffle=True,
-                          num_workers=num_workers, pin_memory=True, drop_last=True)
-
-    if mode == 'train' and not use_pair:
+    if mode == 'train':
         if use_weighted_sampler:
             sampler = dataset.get_sampler()
             return DataLoader(dataset, batch_size=batch_size, sampler=sampler,
