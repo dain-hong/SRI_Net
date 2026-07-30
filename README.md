@@ -53,6 +53,14 @@ sri_net/
 
 5. **NPZ Generation**
    - `image`, `tex_uv`, `amb_uv`, `dl_uv`, `spr_uv`, `label`을 저장합니다.
+  
+## 전처리 실행 방법
+
+\`\`\`bash
+git clone https://github.com/cleardusk/3DDFA.git
+python export_npz.py --json_path <FF++ json> --img_dir <원본 프레임 경로> --out_dir <npz 저장 경로>
+python compute_meanstd.py --npz_base <npz train 경로> --out meanstd.json --mask_zero
+\`\`\`
 
 ## 구현 참고 사항
 
@@ -88,6 +96,12 @@ I = (Ambient + Direct) × Texture
 - DF40: https://github.com/YZY-stack/DF40
 > 본 저장소에는 원본 데이터셋이 포함되어 있지 않습니다.
 
+## Train / Test 실행 방법
+
+\`\`\`bash
+python train.py --config config/config.yaml
+python test.py --config config/config.yaml
+\`\`\`
 
 ## Results
 ### Cross-manipulation (DF40)
